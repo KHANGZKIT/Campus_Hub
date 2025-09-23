@@ -19,7 +19,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "build": "echo \"no build step\"",
+    "tests": "echo \"no tests yet\" && exit 0",
+    "lint": "echo \"no lint yet\" && exit 0"
   },
   "keywords": [],
   "author": "",
