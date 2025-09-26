@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Campus Hub • Phòng tự học</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <a class="logo" href="../home/homepage.html" aria-label="Về trang chủ">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M12 3 1 8l11 5 9-4.1V17h2V8L12 3z" />
+                    <path d="M11 14 3.5 10.5V14c0 1.9 3.6 3.5 8 3.5s8-1.6 8-3.5v-3.1L13 14l-2 0z" />
+                </svg>
+            </a>
+            <strong>PHÒNG TỰ HỌC</strong>
+        </div>
+        <div class="actions-inline">
+            <button id="btnLogin" class="btn small">Dán token</button>
+            <button id="btnLogout" class="btn small" style="display:none">Đăng xuất</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- BỘ LỌC -->
+        <section class="panel filters">
+            <div class="field"><label>Ngày</label><input type="date" id="date"></div>
+            <div class="field"><label>Bắt đầu</label><input type="time" id="start" value="08:00"></div>
+            <div class="field"><label>Kết thúc</label><input type="time" id="end" value="10:00"></div>
+            <div class="field"><label>Sức chứa tối thiểu</label><input type="number" id="capMin" placeholder="VD 6">
+            </div>
+            <div class="field"><label>Từ khoá</label><input type="text" id="keyword" placeholder="Tên phòng…"></div>
+            <div class="field wide actions">
+                <button class="btn ghost" id="btnClear">Xóa lọc</button>
+                <button class="btn primary" id="btnSearch">Tải phòng</button>
+            </div>
+        </section>
+
+        <!-- LAYOUT -->
+        <section class="layout">
+            <div>
+                <div id="rooms" class="grid"></div>
+                <div id="roomsEmpty" class="empty" style="display:none">Không có phòng phù hợp.</div>
+            </div>
+            <aside class="panel">
+                <h3 class="panel-title">Đặt phòng của tôi</h3>
+                <p class="muted">Danh sách sắp tới.</p>
+                <ul id="myBookings" class="list"></ul>
+                <div id="myEmpty" class="empty" style="display:none">Chưa có đặt phòng.</div>
+            </aside>
+        </section>
+    </main>
+
+    <!-- MODAL ĐẶT PHÒNG -->
+    <dialog id="dlg">
+        <div class="modal">
+            <div class="modal-head">
+                <h3 id="dlgTitle">Đặt phòng</h3>
+                <button class="btn icon" id="dlgClose">✕</button>
+            </div>
+            <div class="modal-grid">
+                <div class="field"><label>Phòng</label><input id="dlgRoom" disabled></div>
+                <div class="field"><label>Ngày</label><input type="date" id="dlgDate"></div>
+                <div class="field"><label>Bắt đầu</label><input type="time" id="dlgStart"></div>
+                <div class="field"><label>Kết thúc</label><input type="time" id="dlgEnd"></div>
+                <div class="field"><label>Số người</label><input type="number" id="dlgPeople" min="1" value="2"></div>
+                <div class="field wide"><label>Ghi chú</label><input id="dlgNote" placeholder="Tùy chọn"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="dlgCancel">Hủy</button>
+                <button class="btn primary" id="dlgSubmit">Xác nhận</button>
+            </div>
+        </div>
+    </dialog>
+
+    <script src="./app.js"></script>
+</body>
+
+</html>

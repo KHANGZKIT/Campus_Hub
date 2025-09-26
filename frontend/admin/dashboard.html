@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Campus Hub • Admin Dashboard</title>
+    <style>
+        :root {
+            --bg: #f6f7fb;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --primary: #2563eb;
+            --ring: rgba(37, 99, 235, .12);
+            --border: #e5e7eb;
+            --radius: 18px;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+            color: var(--text);
+            background: var(--bg)
+        }
+
+        /* Layout */
+        .shell {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh
+        }
+
+        @media (max-width: 980px) {
+            .shell {
+                grid-template-columns: 1fr
+            }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 18px;
+            border-right: 1px solid var(--border);
+            background: var(--card)
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 8px
+        }
+
+        .logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: var(--ring);
+            display: grid;
+            place-items: center
+        }
+
+        .brand-title {
+            font-weight: 700;
+            font-size: 14px
+        }
+
+        .brand-sub {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: -3px
+        }
+
+        .nav {
+            display: grid;
+            gap: 6px;
+            margin-top: 6px
+        }
+
+        .nav button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 12px;
+            border: 0;
+            border-radius: 12px;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            transition: .15s
+        }
+
+        .nav button:hover {
+            background: var(--ring);
+            color: var(--primary)
+        }
+
+        .nav .active {
+            background: color-mix(in srgb, var(--primary) 14%, #fff);
+            color: var(--primary)
+        }
+
+        .nav svg {
+            width: 18px;
+            height: 18px
+        }
+
+        .logout {
+            margin-top: auto
+        }
+
+        .logout button {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 0;
+            background: transparent;
+            color: #ef4444;
+            cursor: pointer
+        }
+
+        .logout button:hover {
+            background: rgba(239, 68, 68, .08)
+        }
+
+        /* Main */
+        .main {
+            padding: 20px
+        }
+
+        .topbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: .2px
+        }
+
+        .search {
+            position: relative
+        }
+
+        .search input {
+            width: 260px;
+            max-width: 100%;
+            padding: 10px 12px 10px 34px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #fff;
+            outline: none
+        }
+
+        .search svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--muted)
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--ring);
+            display: inline-grid;
+            place-items: center;
+            font-weight: 700
+        }
+
+        /* KPI Cards */
+        .kpis {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(4, 1fr);
+            margin-top: 18px
+        }
+
+        @media (max-width: 1100px) {
+            .kpis {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        @media (max-width: 560px) {
+            .kpis {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: 0 1px 0 rgba(16, 24, 40, .02)
+        }
+
+        .card .card-title {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 8px
+        }
+
+        .card .card-value {
+            font-size: 30px;
+            font-weight: 800
+        }
+
+        /* Grid: chart + events */
+        .grid-3 {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: 2fr 1fr;
+            margin-top: 18px
+        }
+
+        @media (max-width: 980px) {
+            .grid-3 {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .chart {
+            height: 260px;
+            position: relative;
+            overflow: hidden
+        }
+
+        /* CSS-only mock area chart */
+        .chart-bg {
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            background:
+                linear-gradient(180deg, rgba(37, 99, 235, .18), rgba(37, 99, 235, 0) 70%),
+                linear-gradient(90deg, #ffffff, #f8fafc);
+            border: 1px dashed var(--border)
+        }
+
+        .chart-line {
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            bottom: 36px;
+            height: 2px;
+            background: var(--primary);
+            mask:
+                radial-gradient(12px 12px at 6% 44%, #000 99%, #0000) 0 0/16% 100 repeat-x
+        }
+
+        .chart-x {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 8px;
+            display: flex;
+            justify-content: space-around;
+            color: var(--muted);
+            font-size: 12px
+        }
+
+        /* Events */
+        .events ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 10px
+        }
+
+        .event {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px
+        }
+
+        .event .date {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-weight: 600
+        }
+
+        .btn-ghost {
+            border: 1px solid var(--border);
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 10px;
+            cursor: pointer
+        }
+
+        .btn-ghost:hover {
+            background: #f8fafc
+        }
+
+        /* Table */
+        .table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        .table th,
+        .table td {
+            padding: 12px 14px;
+            text-align: left
+        }
+
+        .table thead th {
+            color: var(--muted);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid var(--border)
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            background: #f8fafc
+        }
+
+        .badge.primary {
+            background: color-mix(in srgb, var(--primary) 12%, #fff);
+            color: var(--primary);
+            border-color: transparent
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end
+        }
+
+        .btn {
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer
+        }
+
+        .btn:hover {
+            background: #f8fafc
+        }
+
+        .btn.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff
+        }
+
+        /* Cards headings */
+        .section-title {
+            font-weight: 700;
+            margin: 0 0 8px 0
+        }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        /* Hide sidebar on mobile */
+        @media (max-width:980px) {
+            .sidebar {
+                display: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo" aria-hidden>
+                    <!-- Graduation cap icon -->
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                        <path d="M12 3 1 8l11 5 9-4.1V17h2V8L12 3z" />
+                        <path d="M11 14 3.5 10.5V14c0 1.9 3.6 3.5 8 3.5s8-1.6 8-3.5v-3.1L13 14l-2 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="brand-title">CAMPUS HUB</div>
+                    <div class="brand-sub">ADMIN</div>
+                </div>
+            </div>
+            <nav class="nav">
+                <button class="active">🏠 <span>Dashboard</span></button>
+                <button>👥 <span>Quản lý người dùng</span></button>
+                <button>📅 <span>Thời khóa biểu</span></button>
+                <button>🚪 <span>Phòng tự học</span></button>
+                <button>📣 <span>Sự kiện</span></button>
+                <button>🔔 <span>Thông báo</span></button>
+                <button>📦 <span>Đồ thất lạc</span></button>
+                <button>⚙️ <span>Quản trị hệ thống</span></button>
+            </nav>
+            <div class="logout">
+                <button>⎋ Đăng xuất</button>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main">
+            <div class="topbar">
+                <h1 class="title">Dashboard Quản trị</h1>
+                <div style="display:flex;align-items:center;gap:10px">
+                    <label class="search">
+                        <input placeholder="Tìm kiếm…" />
+                        <svg viewBox="0 0 24 24">
+                            <path fill="currentColor"
+                                d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79L20 21.5 21.5 20l-6-6zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                        </svg>
+                    </label>
+                    <div class="avatar">AD</div>
+                </div>
+            </div>
+
+            <!-- KPIs -->
+            <section class="kpis">
+                <div class="card">
+                    <div class="card-title">Tổng số sinh viên</div>
+                    <div class="card-value">1.200</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Phòng tự học đã đặt</div>
+                    <div class="card-value">55</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Sự kiện sắp diễn ra</div>
+                    <div class="card-value">8</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Thông báo mới</div>
+                    <div class="card-value">15</div>
+                </div>
+            </section>
+
+            <!-- Chart + Events -->
+            <section class="grid-3">
+                <div class="card">
+                    <h3 class="section-title">Thống kê đặt phòng tự học</h3>
+                    <div class="chart">
+                        <div class="chart-bg"></div>
+                        <div class="chart-line"></div>
+                        <div class="chart-x">
+                            <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                        </div>
+                    </div>
+                    <p class="muted" style="margin-top:8px">*Biểu đồ mô phỏng bằng CSS (không dùng JS).</p>
+                </div>
+                <div class="card events">
+                    <h3 class="section-title">Sự kiện gần đây</h3>
+                    <ul>
+                        <li class="event">
+                            <div><span class="date">02/05</span> &nbsp; Workshop Kỹ năng viết CV</div><button
+                                class="btn-ghost">Sửa</button>
+                        </li>
+                        <li class="event">
+                            <div><span class="date">20/04</span> &nbsp; Chung kết cuộc thi hùng biện</div><button
+                                class="btn-ghost">Sửa</button>
+                        </li>
+                        <li class="event">
+                            <div><span class="date">25/04</span> &nbsp; Ngày hội CLB Khởi nghiệp</div><button
+                                class="btn-ghost">Sửa</button>
+                        </li>
+                        <li class="event">
+                            <div><span class="date">20/04</span> &nbsp; Buổi giao lưu thể thao</div><button
+                                class="btn-ghost">Sửa</button>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Users table -->
+            <section class="card" style="margin-top:18px">
+                <h3 class="section-title">Quản lý người dùng</h3>
+                <div style="overflow:auto">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tên</th>
+                                <th>Email</th>
+                                <th>Vai trò</th>
+                                <th style="text-align:right">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Nguyễn Văn A</td>
+                                <td>nva@fit.haui.edu.vn</td>
+                                <td><span class="badge">Sinh viên</span></td>
+                                <td>
+                                    <div class="actions"><button class="btn">Sửa</button><button class="btn primary">Tìm
+                                            chủ</button></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Trần Thị B</td>
+                                <td>ttb@fit.haui.edu.vn</td>
+                                <td><span class="badge">Sinh viên</span></td>
+                                <td>
+                                    <div class="actions"><button class="btn">Sửa</button><button class="btn primary">Tìm
+                                            chủ</button></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Phạm Văn C</td>
+                                <td>pvc@fit.haui.edu.vn</td>
+                                <td><span class="badge primary">Staff</span></td>
+                                <td>
+                                    <div class="actions"><button class="btn">Sửa</button><button class="btn primary">Tìm
+                                            chủ</button></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Lê Thảo D</td>
+                                <td>ltd@fit.haui.edu.vn</td>
+                                <td><span class="badge">Sinh viên</span></td>
+                                <td>
+                                    <div class="actions"><button class="btn">Sửa</button><button class="btn primary">Tìm
+                                            chủ</button></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

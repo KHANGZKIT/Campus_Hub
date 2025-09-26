@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../db/client.js';
 import { hashPassword, comparePassword } from '../utils/passwords.js';
+import { shortHash } from '../utils/debug.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
 
@@ -32,10 +33,10 @@ export const register = asyncHandler(async (req, res) => {
         return res.status(201).json({ _id: user.id, email: user.email });
     } catch (error) {
         if (error?.code === 'P2002') {
-        
+
             return res.status(409).json({ message: 'Email đã tồn tại' });
         }
-        throw error; 
+        throw error;
     }
 });
 
