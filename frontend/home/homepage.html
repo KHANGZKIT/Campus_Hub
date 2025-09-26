@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Campus Hub • Trang chủ</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <!-- ========== NAVBAR ========== -->
+    <header class="navbar">
+        <a class="brand" href="./index.html">
+            <a class="brand-icon" href="../home/homepage.html" aria-label="Về trang chủ">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path d="M12 3 1 8l11 5 9-4.1V17h2V8L12 3z" />
+                    <path d="M11 14 3.5 10.5V14c0 1.9 3.6 3.5 8 3.5s8-1.6 8-3.5v-3.1L13 14l-2 0z" />
+                </svg>
+            </a>
+            <span>CAMPUS HUB</span>
+        </a>
+
+        <!-- Menu chuẩn, mở cùng tab -->
+        <nav class="nav">
+            <a href="./index.html">Trang chủ</a>
+            <a href="../booking/booking.html">Đặt phòng</a>
+            <a href="../room/rooms.html">Phòng tự học</a>
+            <a href="./events.html">Sự kiện</a>
+            <a href="./lostfound.html">Đồ thất lạc</a>
+            <a href="./announcements.html">Thông báo</a>
+        </nav>
+
+        <button class="avatar" title="Tài khoản">A</button>
+        <button id="btnMenu" class="btn-icon" aria-label="Menu">☰</button>
+    </header>
+
+    <!-- ========== HERO ========== -->
+    <section class="hero">
+        <div class="hero-bg" aria-hidden></div>
+        <div class="hero-content container">
+            <h1>Siêu ứng dụng dành cho sinh viên</h1>
+            <p>Quản lý lịch học, đặt phòng, sự kiện, hỗ trợ sinh viên — tất cả trong một nơi.</p>
+            <div class="actions">
+                <!-- chuyển cùng tab tới trang đặt phòng -->
+                <a class="btn primary" href="../booking/booking.html">Khám phá ngay</a>
+                <a class="btn ghost" href="./timetable.html">Xem thời khóa biểu</a>
+            </div>
+        </div>
+    </section>
+
+    <main class="container">
+        <!-- ========== SERVICES ========== -->
+        <section class="section">
+            <h2 class="section-title">Các dịch vụ chính</h2>
+            <div class="grid-5">
+                <a class="service-card" href="./timetable.html">
+                    <div class="icon">📅</div>
+                    <h3>Thời khóa biểu</h3>
+                    <p>Xem lịch học cá nhân</p>
+                </a>
+                <a class="service-card" href="../booking/booking.html">
+                    <div class="icon">🏫</div>
+                    <h3>Phòng tự học</h3>
+                    <p>Đặt phòng, check-in</p>
+                </a>
+                <a class="service-card" href="./events.html">
+                    <div class="icon">🎉</div>
+                    <h3>Sự kiện</h3>
+                    <p>Thông tin sự kiện</p>
+                </a>
+                <a class="service-card" href="./lostfound.html">
+                    <div class="icon">📦</div>
+                    <h3>Đồ thất lạc</h3>
+                    <p>Tìm/đăng đồ thất lạc</p>
+                </a>
+                <a class="service-card" href="./announcements.html">
+                    <div class="icon">🔔</div>
+                    <h3>Thông báo</h3>
+                    <p>Tin mới từ trường</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- ========== NEWS & FEATURED ========== -->
+        <section class="section split">
+            <div class="panel">
+                <h2 class="section-title">Tin tức & Thông báo mới nhất</h2>
+                <ul class="news">
+                    <li>
+                        <time>24/04/2024</time>
+                        <div>
+                            <a href="#">Thông báo nghỉ học ngày 30/4</a>
+                            <div><a class="link" href="#">Xem chi tiết</a></div>
+                        </div>
+                    </li>
+                    <li>
+                        <time>21/04/2024</time>
+                        <div>
+                            <a href="#">Giờ mở cửa thư viện tuần này</a>
+                            <div><a class="link" href="#">Xem chi tiết</a></div>
+                        </div>
+                    </li>
+                    <li>
+                        <time>18/04/2024</time>
+                        <div>
+                            <a href="#">Cập nhật đăng ký học phần</a>
+                            <div><a class="link" href="#">Xem chi tiết</a></div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="panel featured">
+                <h2 class="section-title">Sự kiện nổi bật</h2>
+                <div class="event-card">
+                    <div class="event-badge">Nổi bật</div>
+                    <h3>Hội thảo khởi nghiệp</h3>
+                    <p class="muted">23/04/2024 • Hội trường lớn</p>
+                    <p>Chia sẻ hành trình từ ý tưởng đến sản phẩm với khách mời là các nhà sáng lập trẻ.</p>
+                    <a class="btn primary" href="./events.html">Đăng ký tham gia</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== QUICK LINKS ========== -->
+        <section class="section">
+            <h2 class="section-title">Tiện ích nhanh cho sinh viên</h2>
+            <div class="quick-links panel">
+                <div>
+                    <a href="#">Tra cứu điểm</a>
+                    <a href="#">Đăng ký môn học</a>
+                </div>
+                <div>
+                    <a href="#">Website trường</a>
+                    <a href="#">Điều khoản sử dụng</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <div class="container">
+            <p>Campus Hub — KHANGZKIT_MẠNH_NAM</p>
+            <p>Liên hệ: <a href="mailto:cs@campushub.com">campushub@gmail.com</a> • 0123-456-789</p>
+            <nav>
+                <a href="#">Chính sách</a> • <a href="#">Hỏi đáp</a> • <a href="#">Điều khoản sử dụng</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- JS: toggle menu mobile + set active nav -->
+    <script>
+        // Toggle menu trên mobile
+        document.getElementById('btnMenu')?.addEventListener('click', () => {
+            const nav = document.querySelector('.nav');
+            nav.style.display = (getComputedStyle(nav).display === 'none') ? 'flex' : 'none';
+        });
+
+        // Đánh dấu menu active theo URL
+        (function setActiveNav() {
+            const here = location.pathname.replace(/\/index\.html$/, '/');
+            document.querySelectorAll('.nav a').forEach(a => {
+                const url = new URL(a.getAttribute('href'), location.origin);
+                const path = url.pathname.replace(/\/index\.html$/, '/');
+                a.classList.toggle('active', here === path || here.endsWith(path));
+            });
+        })();
+    </script>
+</body>
+
+</html>

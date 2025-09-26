@@ -19,6 +19,38 @@ model User {
   passwordHash String
   fullName     String?
   createdAt    DateTime @default(now())
+  bookings     Booking[]
 }
+
+model Room {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  capacity  Int
+  createdAt DateTime @default(now())
+  bookings  Booking[]
+}
+
+enum BookingStatus {
+  approved
+  pending
+  cancelled
+}
+
+model Booking {
+  id        String        @id @default(uuid())
+  roomId    Int
+  userId    String
+  startsAt  DateTime
+  endsAt    DateTime
+  status    BookingStatus @default(approved)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, startsAt, endsAt])
+}
+
 
 

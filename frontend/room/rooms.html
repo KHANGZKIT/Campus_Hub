@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rooms API Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-50 min-h-screen text-slate-800">
+    <div class="max-w-6xl mx-auto p-6 space-y-6">
+        <header class="flex items-center justify-between">
+            <h1 class="text-2xl font-bold">Rooms API Tester</h1>
+            <div class="flex items-center gap-2">
+                <label class="text-sm" for="baseUrl">Base URL</label>
+                <input id="baseUrl" class="px-3 py-2 rounded border w-96" value="http://localhost:5000/api/rooms" />
+                <button id="pingBtn" class="px-3 py-2 rounded bg-slate-800 text-white">Ping (GET /)</button>
+            </div>
+        </header>
+
+        <section class="grid md:grid-cols-2 gap-6">
+            <!-- LIST -->
+            <div class="bg-white p-4 rounded-2xl shadow">
+                <h2 class="font-semibold mb-2">Danh sách phòng (GET /)</h2>
+                <div class="flex gap-2 mb-3">
+                    <input id="qName" class="px-3 py-2 rounded border flex-1"
+                        placeholder="Từ khóa tên (optional, e.g. ?q=A101)" />
+                    <input id="qMinCap" type="number" class="px-3 py-2 rounded border w-40"
+                        placeholder="Min capacity" />
+                    <button id="listBtn" class="px-3 py-2 rounded bg-blue-600 text-white">Tải phòng</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm" id="roomsTable">
+                        <thead>
+                            <tr class="bg-slate-100">
+                                <th class="text-left p-2">ID</th>
+                                <th class="text-left p-2">Name</th>
+                                <th class="text-left p-2">Capacity</th>
+                                <th class="text-left p-2">CreatedAt</th>
+                                <th class="text-left p-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roomsTbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CREATE -->
+            <div class="bg-white p-4 rounded-2xl shadow">
+                <h2 class="font-semibold mb-2">Tạo phòng (POST /)</h2>
+                <div class="grid gap-2 mb-3">
+                    <input id="cName" class="px-3 py-2 rounded border" placeholder="Tên phòng (unique)" />
+                    <input id="cCapacity" type="number" class="px-3 py-2 rounded border" placeholder="Sức chứa (int)" />
+                </div>
+                <button id="createBtn" class="px-3 py-2 rounded bg-emerald-600 text-white">Tạo</button>
+            </div>
+
+            <!-- DETAIL -->
+            <div class="bg-white p-4 rounded-2xl shadow">
+                <h2 class="font-semibold mb-2">Xem phòng (GET /:id)</h2>
+                <div class="flex gap-2 mb-3">
+                    <input id="gId" class="px-3 py-2 rounded border flex-1" placeholder="ID (int)" />
+                    <button id="getBtn" class="px-3 py-2 rounded bg-slate-700 text-white">Lấy</button>
+                </div>
+                <pre id="getOut" class="text-xs bg-slate-100 p-2 rounded max-h-64 overflow-auto"></pre>
+            </div>
+
+            <!-- UPDATE -->
+            <div class="bg-white p-4 rounded-2xl shadow">
+                <h2 class="font-semibold mb-2">Cập nhật phòng (PATCH /:id)</h2>
+                <div class="grid gap-2 mb-3">
+                    <input id="uId" class="px-3 py-2 rounded border" placeholder="ID (int)" />
+                    <input id="uName" class="px-3 py-2 rounded border" placeholder="Tên mới (optional)" />
+                    <input id="uCapacity" type="number" class="px-3 py-2 rounded border"
+                        placeholder="Sức chứa mới (optional)" />
+                </div>
+                <button id="updateBtn" class="px-3 py-2 rounded bg-amber-600 text-white">Cập nhật</button>
+            </div>
+
+            <!-- DELETE -->
+            <div class="bg-white p-4 rounded-2xl shadow md:col-span-2">
+                <h2 class="font-semibold mb-2">Xóa phòng (DELETE /:id)</h2>
+                <div class="flex gap-2 mb-3">
+                    <input id="dId" class="px-3 py-2 rounded border w-64" placeholder="ID (int)" />
+                    <button id="deleteBtn" class="px-3 py-2 rounded bg-rose-600 text-white">Xóa</button>
+                </div>
+                <pre id="log" class="text-xs bg-slate-100 p-2 rounded max-h-64 overflow-auto"></pre>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const log = (msg) => {
+            const el = $('log');
+            const text = (typeof msg === 'string') ? msg : JSON.stringify(msg, null, 2);
+            el.textContent = text;
+        };
+
+        const getBase = () => $('baseUrl').value.replace(/\/$/, '');
+
+        async function handleResp(resp) {
+            const text = await resp.text();
+            try {
+                return { ok: resp.ok, status: resp.status, data: text ? JSON.parse(text) : null };
+            } catch {
+                return { ok: resp.ok, status: resp.status, data: text };
+            }
+        }
+
+        function renderRooms(rows = []) {
+            const tbody = $('roomsTbody');
+            tbody.innerHTML = '';
+            if (!Array.isArray(rows)) rows = [];
+            for (const r of rows) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td class="p-2">${r.id}</td>
+          <td class="p-2">${r.name}</td>
+          <td class="p-2">${r.capacity}</td>
+          <td class="p-2 text-xs">${r.createdAt ? new Date(r.createdAt).toLocaleString() : ''}</td>
+          <td class="p-2">
+            <button class="px-2 py-1 rounded bg-slate-700 text-white text-xs" data-id="${r.id}">GET</button>
+          </td>`;
+                tbody.appendChild(tr);
+            }
+            // wire row GET buttons
+            tbody.querySelectorAll('button[data-id]').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    $('gId').value = btn.dataset.id;
+                    $('getBtn').click();
+                });
+            });
+        }
+
+        // Ping (GET /)
+        $('pingBtn').addEventListener('click', async () => {
+            const url = getBase();
+            const resp = await fetch(url);
+            const out = await handleResp(resp);
+            log(out);
+            if (out.ok) {
+                const rows = Array.isArray(out.data)
+                    ? out.data
+                    : (out.data && Array.isArray(out.data.items) ? out.data.items : []);
+                renderRooms(rows);
+            }
+        });
+
+        // List with optional query params
+        $('listBtn').addEventListener('click', async () => {
+            const base = getBase();
+            const params = new URLSearchParams();
+            if ($('qName').value) params.set('q', $('qName').value);
+            if ($('qMinCap').value) params.set('min_capacity', $('qMinCap').value);
+            const url = params.toString() ? `${base}?${params.toString()}` : base;
+            const resp = await fetch(url);
+            const out = await handleResp(resp);
+            log(out);
+            if (out.ok) {
+                const rows = Array.isArray(out.data)
+                    ? out.data
+                    : (out.data && Array.isArray(out.data.items) ? out.data.items : []);
+                renderRooms(rows);
+            }
+        });
+
+        // Create
+        $('createBtn').addEventListener('click', async () => {
+            const body = { name: $('cName').value, capacity: Number($('cCapacity').value) };
+            const resp = await fetch(getBase(), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const out = await handleResp(resp);
+            log(out);
+            if (out.ok) $('listBtn').click();
+        });
+
+        // Get by id
+        $('getBtn').addEventListener('click', async () => {
+            const id = $('gId').value.trim();
+            if (!id) return;
+            const resp = await fetch(`${getBase()}/${id}`);
+            const out = await handleResp(resp);
+            $('getOut').textContent = JSON.stringify(out, null, 2);
+        });
+
+        // Update
+        $('updateBtn').addEventListener('click', async () => {
+            const id = $('uId').value.trim();
+            if (!id) return;
+            const body = {};
+            if ($('uName').value) body.name = $('uName').value;
+            if ($('uCapacity').value) body.capacity = Number($('uCapacity').value);
+            const resp = await fetch(`${getBase()}/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const out = await handleResp(resp);
+            log(out);
+            if (out.ok) $('listBtn').click();
+        });
+
+        // Delete
+        $('deleteBtn').addEventListener('click', async () => {
+            const id = $('dId').value.trim();
+            if (!id) return;
+            const resp = await fetch(`${getBase()}/${id}`, { method: 'DELETE' });
+            const out = await handleResp(resp);
+            log(out);
+            if (out.ok) $('listBtn').click();
+        });
+
+        // Auto list on load
+        window.addEventListener('load', () => $('listBtn').click());
+    </script>
+</body>
+
+</html>
