@@ -13,14 +13,15 @@ import {
     updateRoom,
     deleteRoom,
 } from '../controllers/roomController.js';
+import { requireRole } from '../middlewares/authHandlers.js';
 
 const router = express.Router();
 
 // router.post('/', authGuard, requireRole('admin','staff'), validate(createRoomSchema), createRoom);
-router.post('/', validate(createRoomSchema), createRoom);
+router.post('/', requireRole('admin', 'staff'), validate(createRoomSchema), createRoom);
 router.get('/', validateQuery(listRoomsQuerySchema), listRooms);
-router.get('/:id', validateParams(roomIdParamSchema), getRoom);
-router.patch('/:id', validateParams(roomIdParamSchema), validate(updateRoomSchema), updateRoom);
-router.delete('/:id', validateParams(roomIdParamSchema), deleteRoom);
+router.get('/:id', requireRole('admin', 'staff'), validateParams(roomIdParamSchema), getRoom);
+router.patch('/:id', requireRole('admin', 'staff'), validateParams(roomIdParamSchema), validate(updateRoomSchema), updateRoom);
+router.delete('/:id', requireRole('admin', 'staff'), validateParams(roomIdParamSchema), deleteRoom);
 
 export default router;

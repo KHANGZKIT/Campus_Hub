@@ -8,36 +8,41 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
 
 // Đăng ký
 export const register = asyncHandler(async (req, res) => {
-    const emailRaw = req.body?.email;
-    const password = req.body?.password;
-    const fullName = req.body?.fullName;
-
-    if (!emailRaw || !password || !fullName) {
-        return res.status(400).json({ message: 'All fields are mandatory' });
-    }
-
-    const email = String(emailRaw).trim().toLowerCase();
-
-    const exists = await prisma.user.findUnique({ where: { email } });
-    if (exists) {
-        return res.status(409).json({ message: 'Email đã tồn tại' });
-    }
-
-    const passwordHash = await hashPassword(password);
-
     try {
-        const user = await prisma.user.create({
-            data: { email, passwordHash, fullName },
-            select: { id: true, email: true }
-        });
-        return res.status(201).json({ _id: user.id, email: user.email });
-    } catch (error) {
-        if (error?.code === 'P2002') {
+        const { email, password, fullName } = req.validated.body;
 
-            return res.status(409).json({ message: 'Email đã tồn tại' });
+        if (!email || !password || !fullName) {
+            return res.status(400).json({ message: 'All fields are mandatory' });
         }
-        throw error;
+        const passwordHash = await hashPassword(password)
+
+        const user = await prisma.user.findUnique({
+            data: { email, passwordHash, fullName },
+            select: { id: true, email: true },
+        });
+
+        const student = await prisma.role.findUnique({
+            where: { name: 'student' }
+        });
+        await prisma.userRole.upsert({
+            where: { userId_roleId: { userId: user.id, roleId: student.id } },
+            update: {},
+            create: {
+                user: { connect: { id: user.id } },
+                role: { connect: { id: student.id } }
+            }
+        });
+
+        const token = jwt.sign({ sub: user.id }, JWT_SECRET, {
+            algorithm: 'HS256',
+            expiresIn: '7d',
+        });
+        res.status(201).json({ id: user.id, email: user.email, token });
+
+    } catch (error) {
+        next(error);
     }
+
 });
 
 // Đăng nhập
@@ -63,28 +68,44 @@ export const login = asyncHandler(async (req, res) => {
     return res.status(200).json({ accessToken });
 });
 
-// Lấy thông tin hiện tại
+// Lấy thông tin user hiện tại
 export const me = asyncHandler(async (req, res) => {
-    const h = req.header('authorization') || '';
+    // Lấy token như cũ
+    const h = req.get('authorization') || '';
     const token = h.startsWith('Bearer ') ? h.slice(7) : '';
-    if (!token) {
-        return res.status(401).json({ message: 'Missing token' });
-    }
+    if (!token) return res.status(401).json({ message: 'Missing token' });
 
-    let sub;
+    let payload;
     try {
-        ({ sub } = jwt.verify(token, JWT_SECRET));
+        payload = jwt.verify(token, JWT_SECRET); // { sub: '<userId>', ... }
     } catch {
         return res.status(401).json({ message: 'Invalid token' });
     }
+    const sub = typeof payload?.sub === 'string' ? payload.sub : null;
+    if (!sub) return res.status(401).json({ message: 'Invalid token subject' });
 
+    // 👇 Lấy user + roles qua bảng nối
     const user = await prisma.user.findUnique({
         where: { id: sub },
-        select: { id: true, email: true, fullName: true, createdAt: true }
+        select: {
+            id: true,
+            email: true,
+            fullName: true,
+            createdAt: true,
+            userRoles: { include: { role: true } }, // <- join
+        },
     });
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-    }
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    return res.json(user);
+    // Map về mảng tên role gọn gàng cho FE
+    const roles = user.userRoles.map(ur => ur.role.name);
+
+    return res.json({
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        createdAt: user.createdAt,
+        roles, // ví dụ: ["student"] hoặc ["staff","student"]
+    });
 });
+

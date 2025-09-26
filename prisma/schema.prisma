@@ -20,6 +20,7 @@ model User {
   fullName     String?
   createdAt    DateTime @default(now())
   bookings     Booking[]
+  roles        UserRole[]
 }
 
 model Room {
@@ -51,6 +52,21 @@ model Booking {
 
   @@index([roomId, startsAt, endsAt])
 }
+
+model Role {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  users UserRole[]
+}
+
+model UserRole {
+  userId String
+  roleId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  @@id([userId, roleId])
+}
+
 
 
 
