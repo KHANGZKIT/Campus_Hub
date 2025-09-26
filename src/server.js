@@ -14,6 +14,7 @@ app.use(express.static('public'))
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: true, credentials: true }));
 app.use('/api/auth', authRoutes);
+app.use('/api/admin/users', adminUsersRouter);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.get('/health', (_req, res) => res.json({ ok: true }));
