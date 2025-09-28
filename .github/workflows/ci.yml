@@ -1,8 +1,12 @@
+name: ci
+on:
+  push:
+  pull_request:
+
 jobs:
   build_test:
     runs-on: ubuntu-latest
     container: node:20
-
     services:
       postgres:
         image: postgres:16
@@ -15,20 +19,14 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=20
-
     env:
-      # ép toàn bộ step dùng DB bên service 'postgres'
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/campushub?schema=public
-
+      CI: true
     steps:
       - uses: actions/checkout@v4
-
-      # tránh Prisma đọc .env (localhost) từ repo
       - run: rm -f .env
-
       - run: npm ci
       - run: npx prisma generate
-
       - name: Wait DB
         run: |
           apt-get update && apt-get install -y postgresql-client
@@ -37,9 +35,5 @@ jobs:
             echo "waiting $i/40"; sleep 2
           done
           PGPASSWORD=postgres psql -h postgres -U postgres -d campushub -c "select 1"
-
-      - name: Migrate
-        run: npx prisma migrate deploy
-
-      - name: Test
-        run: npm test
+      - run: npx prisma migrate deploy
+      - run: npm test
