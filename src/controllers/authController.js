@@ -2,7 +2,6 @@ import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../db/client.js';
 import { hashPassword, comparePassword } from '../utils/passwords.js';
-import { shortHash } from '../utils/debug.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
 
@@ -14,13 +13,19 @@ export const register = asyncHandler(async (req, res) => {
         if (!email || !password || !fullName) {
             return res.status(400).json({ message: 'All fields are mandatory' });
         }
-        const passwordHash = await hashPassword(password)
 
-        const user = await prisma.user.findUnique({
+        // email đã tồn tại?
+        const existed = await prisma.user.findUnique({ where: { email } });
+        if (existed) return res.status(409).json({ message: 'Email đã tồn tại' });
+
+        //Tao User
+        const passwordHash = await hashPassword(password)
+        const user = await prisma.user.create({
             data: { email, passwordHash, fullName },
             select: { id: true, email: true },
         });
 
+        // Mặc định gán role student
         const student = await prisma.role.findUnique({
             where: { name: 'student' }
         });
@@ -33,6 +38,7 @@ export const register = asyncHandler(async (req, res) => {
             }
         });
 
+        //Tra ve Token
         const token = jwt.sign({ sub: user.id }, JWT_SECRET, {
             algorithm: 'HS256',
             expiresIn: '7d',
@@ -40,7 +46,7 @@ export const register = asyncHandler(async (req, res) => {
         res.status(201).json({ id: user.id, email: user.email, token });
 
     } catch (error) {
-        next(error);
+        console.error(error);
     }
 
 });

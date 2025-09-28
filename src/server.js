@@ -13,7 +13,11 @@ const app = express();
 app.use(express.json())
 app.use(express.static('public'))
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({
+    origin: ['http://localhost:5500', 'http://127.0.0.1:5500'],
+    credentials: false
+}));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', adminUsers);
 app.use('/api/rooms', roomRoutes);
