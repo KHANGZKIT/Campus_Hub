@@ -7,10 +7,10 @@ jobs:
   build_test:
     runs-on: ubuntu-latest
 
-    # ✅ Toàn bộ job chạy bên trong container Node
+    # Toàn bộ job chạy trong container Node
     container: node:20
 
-    # ✅ Dựng Postgres làm service trong cùng network
+    # Service Postgres chạy cùng network
     services:
       postgres:
         image: postgres:16
@@ -18,32 +18,47 @@ jobs:
           POSTGRES_DB: campushub
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-        # Không cần publish ports khi job chạy trong container
         options: >-
           --health-cmd="pg_isready -U postgres"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=12
 
-    # ✅ Kết nối DB qua hostname 'postgres' (tên service)
+    # Kết nối DB bằng hostname 'postgres'
     env:
-      DATABASE_URL: "postgresql://admin:secret@localhost:5432/campushub?schema=public"
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/campushub?schema=public
+      CI: true
 
     steps:
       - uses: actions/checkout@v4
 
-      # Node đã có sẵn vì job chạy trong node:20
-      - run: npm ci
+      - name: Install deps
+        run: npm ci
 
-      - run: npx prisma generate
+      - name: Prisma generate
+        run: npx prisma generate
 
-      - run: npx prisma migrate deploy
+      # Chờ Postgres sẵn sàng (có client psql để dùng pg_isready)
+      - name: Install psql client & wait for DB
+        run: |
+          apt-get update
+          apt-get install -y postgresql-client
+          for i in {1..30}; do
+            if pg_isready -h postgres -p 5432 -U postgres; then
+              echo "Postgres is ready"
+              break
+            fi
+            echo "Waiting for Postgres ($i/30)"
+            sleep 2
+          done
 
-      # Chạy test nếu có; không có thì bỏ qua cho xanh
+      - name: Prisma migrate (retry)
+        run: |
+          set -e
+          npx prisma migrate deploy || (echo "Retry migrate after 5s..." && sleep 5 && npx prisma migrate deploy)
+
       - name: Run tests (skip if none)
         run: |
           if ls **/*.test.* >/dev/null 2>&1; then
             npm test
-          else
-            echo "No tests, skipping"
-          fi
+          e
