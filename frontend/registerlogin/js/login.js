@@ -79,3 +79,36 @@ document.getElementById('SignUpBtn')?.addEventListener('click', async (e) => {
         alert(err?.data?.message || 'Đăng ký thất bại');
     }
 });
+
+const toggleLog = document.getElementById('matLog');
+const contentLog = document.getElementById('log-pass');
+
+toggleLog.addEventListener('click', () => {
+    if (contentLog.type === "password") {
+        contentLog.type = "text";
+        toggleLog.classList.remove('bx-show');
+        toggleLog.classList.add('bx-hide');
+    }
+    else {
+        contentLog.type = "password";
+        toggleLog.classList.remove('bx-hide');
+        toggleLog.classList.add('bx-show');
+    }
+});
+
+
+const toggleReg = document.getElementById('matReg');
+const contentReg = document.getElementById('reg-pass');
+toggleReg.addEventListener('click', () => {
+    if (contentReg.type === "password") {
+        contentReg.type = "text";
+        toggleReg.classList.remove('bx-show');
+        toggleReg.classList.add('bx-hide');
+    }
+    else {
+        contentReg.type = "password";
+        toggleReg.classList.remove('bx-hide');
+        toggleReg.classList.add('bx-show');
+    }
+});
+
