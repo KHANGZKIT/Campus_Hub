@@ -1,6 +1,6 @@
 import express from 'express';
 import { authHandler } from '../middlewares/authHandlers.js';
-import { requireRole } from '../middlewares/requireRole.js';
+import { requireRole } from '../middlewares/roleHandlers.js';
 import { grantRole, revokeRole } from '../services/roleService.js';
 
 const router = express.Router();
