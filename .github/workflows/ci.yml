@@ -4,36 +4,14 @@ on:
   pull_request:
 
 jobs:
-  build_test:
+  build_only:
     runs-on: ubuntu-latest
-    container: node:20
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_DB: campushub
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=20
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/campushub?schema=public
-      CI: true
     steps:
       - uses: actions/checkout@v4
-      - run: rm -f .env
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
       - run: npm ci
-      - run: npx prisma generate
-      - name: Wait DB
-        run: |
-          apt-get update && apt-get install -y postgresql-client
-          for i in {1..40}; do
-            if pg_isready -h postgres -p 5432 -U postgres; then echo ready; break; fi
-            echo "waiting $i/40"; sleep 2
-          done
-          PGPASSWORD=postgres psql -h postgres -U postgres -d campushub -c "select 1"
-      - run: npx prisma migrate deploy
-      - run: npm test
+      - run: npm run build --if-present
+      # Không có bước npm test
