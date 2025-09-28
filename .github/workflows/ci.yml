@@ -6,11 +6,8 @@ on:
 jobs:
   build_test:
     runs-on: ubuntu-latest
-
-    # Toàn bộ job chạy trong container Node
     container: node:20
 
-    # Service Postgres chạy cùng network
     services:
       postgres:
         image: postgres:16
@@ -24,11 +21,6 @@ jobs:
           --health-timeout=5s
           --health-retries=12
 
-    # Kết nối DB bằng hostname 'postgres'
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/campushub?schema=public
-      CI: true
-
     steps:
       - uses: actions/checkout@v4
 
@@ -38,27 +30,29 @@ jobs:
       - name: Prisma generate
         run: npx prisma generate
 
-      # Chờ Postgres sẵn sàng (có client psql để dùng pg_isready)
-      - name: Install psql client & wait for DB
+      # (Quan trọng) Xoá .env local để không override giá trị CI
+      - name: Remove local .env (avoid localhost)
+        run: rm -f .env
+
+      # Chờ DB sẵn sàng
+      - name: Wait for Postgres
         run: |
-          apt-get update
-          apt-get install -y postgresql-client
+          apt-get update && apt-get install -y postgresql-client
           for i in {1..30}; do
             if pg_isready -h postgres -p 5432 -U postgres; then
-              echo "Postgres is ready"
-              break
+              echo "Postgres is ready"; break
             fi
-            echo "Waiting for Postgres ($i/30)"
-            sleep 2
+            echo "Waiting for Postgres ($i/30)"; sleep 2
           done
 
-      - name: Prisma migrate (retry)
-        run: |
-          set -e
-          npx prisma migrate deploy || (echo "Retry migrate after 5s..." && sleep 5 && npx prisma migrate deploy)
+      # (Quan trọng) Ép DATABASE_URL ngay ở step này
+      - name: Prisma migrate (CI)
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://admin:secret@localhost:5432/campushub?schema=public
 
-      - name: Run tests (skip if none)
-        run: |
-          if ls **/*.test.* >/dev/null 2>&1; then
-            npm test
-          e
+      # Chạy test thật (bạn có test)
+      - name: Run tests
+        run: npm test
+        env:
+          DATABASE_URL: postgresql://admin:secret@localhost:5432/campushub?schema=public
