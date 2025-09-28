@@ -24,6 +24,7 @@
     "start": "node src/server.js",
     "build": "echo \"no build step\"",
     "tests": "vitest run --passWithNoTests",
+    "prisma:generate": "prisma generate",
     "bootstrap:admin": "node -r dotenv/config src/scripts/bootstrap-admin.js",
     "lint": "echo \"no lint yet\" && exit 0"
   },
