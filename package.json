@@ -24,6 +24,7 @@
     "start": "node src/server.js",
     "build": "echo \"no build step\"",
     "tests": "echo \"no tests yet\" && exit 0",
+    "bootstrap:admin": "node -r dotenv/config src/scripts/bootstrap-admin.js",
     "lint": "echo \"no lint yet\" && exit 0"
   },
   "keywords": [],

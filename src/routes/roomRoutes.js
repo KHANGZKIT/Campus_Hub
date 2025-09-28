@@ -13,7 +13,7 @@ import {
     updateRoom,
     deleteRoom,
 } from '../controllers/roomController.js';
-import { requireRole } from '../middlewares/authHandlers.js';
+import { requireRole } from '../middlewares/roleHandlers.js';
 
 const router = express.Router();
 

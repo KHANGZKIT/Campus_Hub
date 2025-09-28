@@ -92,13 +92,15 @@ export const me = asyncHandler(async (req, res) => {
             email: true,
             fullName: true,
             createdAt: true,
-            userRoles: { include: { role: true } }, // <- join
+            roles: {
+                include: { role: true }
+            }, // <- join
         },
     });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     // Map về mảng tên role gọn gàng cho FE
-    const roles = user.userRoles.map(ur => ur.role.name);
+    const roles = user.roles.map(ur => ur.role.name);
 
     return res.json({
         id: user.id,
